@@ -11,9 +11,49 @@ const firebaseConfig = {
   };
   
 firebase.initializeApp(firebaseConfig);
+var db = firebase.firestore();
+var auth = firebase.auth();
+
+
+class User{
+  constructor (email, name){
+    this.email = email;
+    this.name = name;
+  }
+}
+
+async function getCurrentUser(){
+  var user = auth.currentUser;
+  if(user!=null){
+  var userData;
+  var snapshot = await db.collection("users").where("email", "==", user.email).get();
+  snapshot.docs.forEach((userVal)=>{
+    userData = new User(userVal.data()["email"], userVal.data()["name"]);
+  });
+  return userData;
+  }
+  else{
+    console.log("Null val");
+  }
+}
+
+async function getCurrentUserRef(){
+  var user = auth.currentUser;
+  if(user!=null){
+  var ref;
+  var snapshot = await db.collection("users").where("email", "==", user.email).get();
+  snapshot.docs.forEach((userVal)=>{
+    ref = userVal.ref;
+  });
+  return ref;
+  }
+  else{
+    console.log("Null val");
+  }
+}
 
 async function check_if_user_exists(email) {
-  var db = firebase.firestore(); 
+
   var length = 0;
   await db.collection("users").where("email", "==", email)
   .get()
@@ -23,7 +63,7 @@ async function check_if_user_exists(email) {
   .catch((error) => {
       console.log("Error getting documents: ", error);
   });
-  if(length == 0){
+  if(length === 0){
     return false;
   }
   else 
@@ -34,11 +74,7 @@ async function signIn() { //Use this function to sign in via Google
   var provider = new firebase.auth.GoogleAuthProvider();
 	await firebase.auth().signInWithPopup(provider).then(async (result) => {
     /** @type {firebase.auth.OAuthCredential} */
-    var credential = result.credential;
-
-    // This gives you a Google Access Token. You can use it to access the Google API.
-    var token = credential.accessToken;
-    // The signed-in user info.
+    
   var user = result.user;
   var userExists = await check_if_user_exists(user.email);
 	if(!userExists){
@@ -57,4 +93,11 @@ async function signIn() { //Use this function to sign in via Google
   });  // The function returns the product of p1 and p2
 }
 
-export  {firebase, signIn};
+class Title{
+  constructor (title, description){
+    this.title = title;
+    this.description = description;
+  }
+}
+
+export  {signIn, getCurrentUser};
