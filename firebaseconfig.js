@@ -140,7 +140,7 @@ async function getAllTopics() {
   var coll = await db.collection("topics").get();
   coll.docs.forEach((topic)=>{
     var data = topic.data();
-    var newTopic = new Topic(data["title"], data["description"], data["owner"], data.id);
+    var newTopic = new Topic(data["title"], data["description"], data["owner"], topic.id);
     list.push(newTopic);
   });
   return list;
@@ -223,7 +223,7 @@ async function getAllRequests() {
   var coll = await db.collection("users").doc(userId).collection("getInvolvedRequests").get()
   coll.docs.forEach((request)=>{
     var data = request.data();
-    var newRequest = new GetInvolved(data["fromUser"], data["toTopic"], data.id);
+    var newRequest = new GetInvolved(data["fromUser"], data["toTopic"], request.id);
     list.push(newRequest);
   });
   return list;
